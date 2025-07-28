@@ -37,6 +37,7 @@ ipa_map = str.maketrans({
 })
 # First pass: collect all matching rows
 matching_rows = []
+seen_combinations = set()  # Track unique (ortho, phon) combinations
 
 with open(input_path, encoding="utf-8") as f_in:
     # Read rows from the TSV input
@@ -55,6 +56,18 @@ with open(input_path, encoding="utf-8") as f_in:
             # Skip if this syllable is already known
             if syllable in known_syllables:
                 continue
+
+            # Create a combination key for deduplication
+            ortho_clean = row["ortho"]
+            phon_clean = row["phon"].translate(ipa_map)
+            combination_key = (ortho_clean, phon_clean)
+
+            # Skip if we've already seen this exact combination
+            if combination_key in seen_combinations:
+                continue
+
+            # Add to seen combinations
+            seen_combinations.add(combination_key)
 
             # Add this new syllable to our known set to avoid duplicates in this session
             # known_syllables.add(syllable)
